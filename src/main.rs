@@ -1,4 +1,4 @@
-use serde_json::{json, Value};
+use serde_json::{json};
 use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use surf;
@@ -34,9 +34,7 @@ async fn send_message(url: &str, title: &str, text: &str) {
 
 #[tokio::main]
 async fn main() {
-    let cfg = BufReader::new(std::fs::File::open("config.json").unwrap());
-    let json: Value = serde_json::from_reader(cfg).unwrap();
-    let url = json["feishu_url"].as_str().unwrap();
+    let url = std::env::var("FEISHU_WEBHOOK_URL").expect("FEISHU_WEBHOOK_URL is not set");
     let args: Vec<_> = std::env::args().collect();
     if args.len() == 1 {
         return;
@@ -71,5 +69,5 @@ async fn main() {
             format!("{:?}", e),
         ),
     };
-    send_message(url, &title, &message).await;
+    send_message(&url, &title, &message).await;
 }
